@@ -1,0 +1,128 @@
+
+
+CREATE DATABASE store;
+
+CREATE TABLE store.countries
+(
+    code           INT PRIMARY KEY,
+    name           VARCHAR(20) UNIQUE,
+    continent_name VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE store.users
+(
+    id            INT PRIMARY KEY,
+    full_name     VARCHAR(20),
+    email         VARCHAR(20) UNIQUE,
+    gender        CHAR(1) CHECK (gender IN ('m', 'f')),
+    date_of_birth VARCHAR(15),
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    country_code  INT,
+    FOREIGN KEY (country_code) REFERENCES store.countries (code)
+);
+
+CREATE TABLE store.orders
+(
+    id         INT PRIMARY KEY,
+    user_id    INT,
+    status     VARCHAR(6) CHECK (status IN ('start', 'finish')), -- Check constraint
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES store.users (id)
+);
+
+CREATE TABLE store.products
+(
+    id         INT PRIMARY KEY,
+    name       VARCHAR(10) NOT NULL,
+    price      INT      DEFAULT 0,
+    status     VARCHAR(10) CHECK (status IN ('valid', 'expired')), -- Check constraint
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE store.order_products
+(
+    order_id   INT,
+    product_id INT,
+    quantity   INT DEFAULT 0,
+    PRIMARY KEY (order_id, product_id),
+    FOREIGN KEY (order_id) REFERENCES store.orders (id),
+    FOREIGN KEY (product_id) REFERENCES store.products (id)
+);
+
+INSERT INTO store.countries (code, name, continent_name)
+VALUES (1, 'Saudi Arabia', 'Asia'),
+       (2, 'Egypt', 'Africa'),
+       (3, 'Germany', 'Europe'),
+       (4, 'Canada', 'North America'),
+       (5, 'Brazil', 'South America');
+
+INSERT INTO store.users (id, full_name, email, gender, date_of_birth, created_at, country_code)
+VALUES (1, 'Mohammed Ali', 'mo@gmail.com', 'm', '1990-01-01', CURRENT_TIMESTAMP, 1),
+       (2, 'Sara Ahmed', 'sara@gmail.com', 'f', '1995-06-15', CURRENT_TIMESTAMP, 2),
+       (3, 'Ali Fahad', 'ali@gmail.com', 'm', '1988-10-10', CURRENT_TIMESTAMP, 1),
+       (4, 'Lina Yusuf', 'lina@gmail.com', 'f', '1993-03-03', CURRENT_TIMESTAMP, 3),
+       (5, 'John Smith', 'john@gmail.com', 'm', '1985-11-30', CURRENT_TIMESTAMP, 4);
+
+INSERT INTO store.products (id, name, price, status, created_at)
+VALUES (1, 'Laptop', 3000, 'valid', CURRENT_TIMESTAMP),
+       (2, 'Phone', 2000, 'valid', CURRENT_TIMESTAMP),
+       (3, 'Tablet', 1500, 'expired', CURRENT_TIMESTAMP),
+       (4, 'Mouse', 100, 'valid', CURRENT_TIMESTAMP),
+       (5, 'Keyboard', 200, 'valid', CURRENT_TIMESTAMP);
+
+INSERT INTO store.orders (id, user_id, status, created_at)
+VALUES (1, 1, 'start', CURRENT_TIMESTAMP),
+       (2, 2, 'finish', CURRENT_TIMESTAMP),
+       (3, 3, 'start', CURRENT_TIMESTAMP),
+       (4, 4, 'finish', CURRENT_TIMESTAMP),
+       (5, 5, 'start', CURRENT_TIMESTAMP);
+
+INSERT INTO store.order_products (order_id, product_id, quantity)
+VALUES (1, 1, 1),
+       (1, 2, 2),
+       (2, 3, 1),
+       (3, 4, 3),
+       (4, 5, 1);
+
+UPDATE store.countries
+SET name = 'Deutschland'
+WHERE code = 3;
+
+UPDATE store.users
+SET email = 'ali.fahad@gmail.com'
+WHERE id = 3;
+
+UPDATE store.products
+SET price = 1200
+WHERE id = 3;
+
+UPDATE store.orders
+SET status = 'finish'
+WHERE id = 3;
+
+UPDATE store.order_products
+SET quantity = 5
+WHERE order_id = 3
+  AND product_id = 4;
+
+DELETE
+FROM store.order_products
+WHERE order_id = 4
+  AND product_id = 5;
+
+DELETE
+FROM store.orders
+WHERE id = 4;
+
+DELETE
+FROM store.products
+WHERE products.name = 'Laptop';
+
+DELETE
+FROM store.users
+WHERE id = 4;
+
+DELETE
+FROM store.countries
+WHERE code = 3;
